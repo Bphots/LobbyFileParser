@@ -47,7 +47,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\LobbyHeroParser\LobbyFileParser.csproj">
+    <ProjectReference Include="..\LobbyFileParser\LobbyFileParser.csproj">
       <Project>{dee55870-eee3-4bb6-80b5-4b3eec15f3ef}</Project>
       <Name>LobbyFileParser</Name>
     </ProjectReference>
