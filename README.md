@@ -1,5 +1,5 @@
 # LobbyFileParser
-A simple library for fetching player name and hero selection from the undocumentated battlelobby file in Heroes of the Storm.
+A simple library for fetching player name and hero selection from the undocumented battlelobby file in Heroes of the Storm.
 
 
 # Thanks
