@@ -13,7 +13,7 @@ namespace LobbyFileParser
     public class TagAndRegionParser
     {
         private readonly int MaxTagByteLength = 32; // Longest player name is 12 letters. Unicode is allowed so 25 bytes + 7 for digits seems reasonable (but technically could be much more)
-        private readonly string TagRegex = @"^\w{3,12}#\d{4,8}$";
+        private readonly string TagRegex = @"^\w{2,12}#\d{4,8}$";
         private readonly byte[] data;
         
         public TagAndRegionParser(byte[] data)
@@ -86,7 +86,15 @@ namespace LobbyFileParser
                     break;
                 var tag = TryExtractBattleTag(offset);
                 if (tag != null)
+                {
+                    if (tag.Any(l => l > 512))
+                    {
+                        int index = tag.IndexOf(tag.First(l => l > 512));
+                        tag = tag.Substring(index);
+                    }
+
                     result.Add(tag);
+                }
                 if (result.Count == 10)
                     break; // do not parse observers
             }
@@ -192,6 +200,9 @@ namespace LobbyFileParser
     {
         public Player(string tag)
         {
+            if (char.IsDigit(tag[0]))
+                tag = tag.Substring(1);
+
             Tag = tag;
         }
 
