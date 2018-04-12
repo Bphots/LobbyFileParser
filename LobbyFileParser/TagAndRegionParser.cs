@@ -194,6 +194,8 @@ namespace LobbyFileParser
         public Region Region { get; set; }
 
         public List<Player> Players { get; set; }
+
+        public string Map { get; set; }
     }
 
     public class Player
