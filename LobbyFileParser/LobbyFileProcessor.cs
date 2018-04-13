@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -19,6 +20,7 @@ namespace LobbyFileParser
         {
             var game = new TagAndRegionParser(m_lobbyBytes).Parse();
             var heroes = new SelectedHeroParser(m_lobbyBytes, m_heroElements).ParseHeroesInfo();
+
             if (game.Players.Count == 5 && heroes.GetRange(0, 5).All(h => h == SelectedHeroParser.Random))
             {
                 heroes.RemoveRange(0, 5);
@@ -26,7 +28,10 @@ namespace LobbyFileParser
 
             for (var i = 0; i < game.Players.Count; i++)
             {
-                game.Players[i].SelectedHero = heroes[i];
+                if (!heroes.Contains(SelectedHeroParser.Fail))
+                    game.Players[i].SelectedHero = heroes[i];
+                else
+                    game.Players[i].SelectedHero = SelectedHeroParser.Fail;
             }
 
             return game;
