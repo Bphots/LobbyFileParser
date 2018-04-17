@@ -36,13 +36,14 @@ namespace LobbyFileParser
                     var mpq = new MpqArchive(s2MaPath);
                     if (mpq.FileExists("DocumentInfo"))
                     {
-                        var ms     = mpq.OpenFile("DocumentInfo");
-                        var buffer = new byte[ms.Length];
-                        ms.Read(buffer, 0, (int)ms.Length);
-                        var str    = System.Text.Encoding.Default.GetString(buffer);
-                        foreach (var map in m_maps)
-                            dict[map] += Regex.Matches(str, map).Count;
-                        ms.Close();
+                        using (var ms = mpq.OpenFile("DocumentInfo"))
+                        {
+                            var buffer = new byte[ms.Length];
+                            ms.Read(buffer, 0, (int)ms.Length);
+                            var str = System.Text.Encoding.Default.GetString(buffer);
+                            foreach (var map in m_maps)
+                                dict[map] += Regex.Matches(str, map).Count;
+                        }
                     }
                 }
                 catch
