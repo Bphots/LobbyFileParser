@@ -7,21 +7,21 @@ namespace LobbyFileParser
 {
     public class LobbyFileProcessor
     {
-        public LobbyFileProcessor(string lobbyFile, List<string> heroes, Dictionary<string, string> mapAttributes)
+        public LobbyFileProcessor(string lobbyFile, List<string> heroes, List<string> maps)
         {
             var tempPath = Path.GetTempFileName();
             File.Copy(lobbyFile, tempPath, true);
             m_lobbyBytes = File.ReadAllBytes(tempPath);
 
             InitializeHeroes(heroes);
-            InitializeMapAttributes(mapAttributes);
+            InitializeMapAttributes(maps);
         }
 
         public Game ParseLobbyInfo()
         {
             var game = new TagAndRegionParser(m_lobbyBytes).Parse();
             var heroes = new SelectedHeroParser(m_lobbyBytes, m_heroElements).ParseHeroesInfo();
-            var map = new MapParser(m_lobbyBytes, m_mapAttributes).Parse();
+            var map = new MapParser(m_lobbyBytes, m_maps).Parse();
 
             if (game.Players.Count == 5 && heroes.GetRange(0, 5).All(h => h == SelectedHeroParser.Random))
             {
@@ -72,14 +72,14 @@ namespace LobbyFileParser
             }
         }
 
-        private void InitializeMapAttributes(Dictionary<string, string> mapAttributes)
+        private void InitializeMapAttributes(List<string> maps)
         {
-            m_mapAttributes = mapAttributes;
+            m_maps = maps;
         }
 
         private readonly List<HeroElement> m_heroElements = new List<HeroElement>();
 
-        private Dictionary<string, string> m_mapAttributes;
+        private List<string> m_maps;
 
         private readonly byte[] m_lobbyBytes;
     }
