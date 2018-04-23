@@ -27,7 +27,7 @@ namespace LobbyFileParser
 
             for (var i = 0; i < s2MaPathNum; i++)
             {
-                var s2MaPath = System.Text.Encoding.Default.GetString(m_lobbyBytes.Skip(2 + i * (s2MaPathLen + 2)).Take(s2MaPathLen).ToArray());
+                var s2MaPath = Encoding.Default.GetString(m_lobbyBytes.Skip(2 + i * (s2MaPathLen + 2)).Take(s2MaPathLen).ToArray());
                 try
                 {
                     var tempPath = Path.GetTempFileName();
@@ -40,15 +40,15 @@ namespace LobbyFileParser
                         {
                             var buffer = new byte[ms.Length];
                             ms.Read(buffer, 0, (int)ms.Length);
-                            var str = System.Text.Encoding.Default.GetString(buffer);
+                            var str = Encoding.Default.GetString(buffer);
                             foreach (var map in m_maps)
-                                dict[map] += Regex.Matches(str, map).Count;
+                                dict[map] += Regex.Matches(str, map.Substring(0,8)).Count;
                         }
                     }
+                    File.Delete(tempPath);
                 }
                 catch
                 {
-                    ;
                 }
             }
 
