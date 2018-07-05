@@ -43,8 +43,8 @@ namespace LobbyFileParser
 
         private void InitializeHeroes(IEnumerable<string> heroes)
         {
-            byte oddByte1 = 1;
-            byte oddByte2 = 0;
+            byte oddByte1 = 0;
+            byte oddByte2 = 2;
             byte evenByte1 = 0;
             byte evenByte2 = 2;
 
@@ -61,17 +61,17 @@ namespace LobbyFileParser
                 m_heroElements.Add(heroElement);
 
                 evenByte2++;
-                if (evenByte2 > 0x1F)
+                if (evenByte2 > 0x03)
                 {
                     evenByte2 = 0;
-                    evenByte1 += 4;
+                    evenByte1 += 1;
                 }
 
                 oddByte2++;
-                if (oddByte2 > 0x01)
+                if (oddByte2 > 0x1F)
                 {
                     oddByte2 = 0;
-                    oddByte1++;
+                    oddByte1 += 4;
                 }
             }
         }
