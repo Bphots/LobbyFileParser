@@ -68,10 +68,10 @@ namespace LobbyFileParser
                 }
 
                 oddByte2++;
-                if (oddByte2 > 0x1F)
+                if (oddByte2 > 0x3F)
                 {
                     oddByte2 = 0;
-                    oddByte1 += 4;
+                    oddByte1 += 8;
                 }
             }
         }
