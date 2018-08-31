@@ -83,6 +83,7 @@ namespace LobbyFileParserTest
             "Valeera",
             "Valla",
             "Varian",
+            "Whitemane",
             "Xul",
             "Yrel",
             "Zagara",

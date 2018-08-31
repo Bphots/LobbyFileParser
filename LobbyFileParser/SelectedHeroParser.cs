@@ -8,7 +8,8 @@ namespace LobbyFileParser
         public const string Random = "Random";
         public const string Fail = "Fail";
 
-        private static readonly byte[] RandomBytes = { 0x00, 0x00 };
+        private static readonly byte[] RandomOddBytes = { 0x00, 0x01 };
+        private static readonly byte[] RandomEvenBytes = { 0x01, 0x00 };
         private readonly List<HeroElement> m_heroes;
         private readonly byte[] m_lobbyBytes;
 
@@ -40,7 +41,7 @@ namespace LobbyFileParser
 
         private string ParseOddHeroSelection(int oddOffset)
         {
-            var desiredFirstByte = m_lobbyBytes[oddOffset] % 4 > 0 ? (m_lobbyBytes[oddOffset] - m_lobbyBytes[oddOffset] % 4) : m_lobbyBytes[oddOffset];
+            var desiredFirstByte = m_lobbyBytes[oddOffset];
             var desiredSecondByte = m_lobbyBytes[oddOffset + 1];
             var hero = m_heroes.FirstOrDefault(
                     h => h.OddByte1 == desiredFirstByte
@@ -49,8 +50,8 @@ namespace LobbyFileParser
             if (hero != null)
                 return hero;
 
-            if (RandomBytes[0] == desiredFirstByte 
-                && RandomBytes[1] == desiredSecondByte)
+            if (RandomOddBytes[0] == desiredFirstByte 
+                && RandomOddBytes[1] == desiredSecondByte)
                 return Random;
 
             return Fail;
@@ -63,13 +64,12 @@ namespace LobbyFileParser
             var hero =
                 m_heroes.FirstOrDefault(
                 h =>
-                    h.EvenByte1 == desiredFirstByte
-                    && h.EvenByte2 == desiredSecondByte)?.Name;
+                    h.EvenByte1 == desiredFirstByte)?.Name;
 
             if (hero != null)
                 return hero;
 
-            if (desiredFirstByte == RandomBytes[0] && desiredSecondByte == RandomBytes[1])
+            if (desiredFirstByte == RandomEvenBytes[0] && desiredSecondByte == RandomEvenBytes[1])
                 return Random;
 
             return Fail;

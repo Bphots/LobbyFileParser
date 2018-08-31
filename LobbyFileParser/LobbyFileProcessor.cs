@@ -45,8 +45,8 @@ namespace LobbyFileParser
         {
             byte oddByte1 = 0;
             byte oddByte2 = 2;
-            byte evenByte1 = 0;
-            byte evenByte2 = 2;
+            byte evenByte1 = 2;
+            byte evenByte2 = 0;
 
             foreach (var hero in heroes)
             {
@@ -60,18 +60,13 @@ namespace LobbyFileParser
                 };
                 m_heroElements.Add(heroElement);
 
-                evenByte2++;
-                if (evenByte2 > 0x03)
-                {
-                    evenByte2 = 0;
-                    evenByte1 += 1;
-                }
+                evenByte1++;
 
                 oddByte2++;
-                if (oddByte2 > 0x3F)
+                if (oddByte2 > 0x07)
                 {
                     oddByte2 = 0;
-                    oddByte1 += 8;
+                    oddByte1 += 1;
                 }
             }
         }
