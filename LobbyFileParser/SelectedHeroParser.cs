@@ -41,7 +41,7 @@ namespace LobbyFileParser
 
         private string ParseOddHeroSelection(int oddOffset)
         {
-            var desiredFirstByte = m_lobbyBytes[oddOffset];
+            var desiredFirstByte = (m_lobbyBytes[oddOffset] / 8) * 8;
             var desiredSecondByte = m_lobbyBytes[oddOffset + 1];
             var hero = m_heroes.FirstOrDefault(
                     h => h.OddByte1 == desiredFirstByte
@@ -60,11 +60,11 @@ namespace LobbyFileParser
         private string ParseEvenHeroSelection(int evenOffset)
         {
             var desiredFirstByte = m_lobbyBytes[evenOffset];
-            var desiredSecondByte = m_lobbyBytes[evenOffset + 1] % 4;
+            var desiredSecondByte = m_lobbyBytes[evenOffset + 1] % 8;
             var hero =
                 m_heroes.FirstOrDefault(
                 h =>
-                    h.EvenByte1 == desiredFirstByte)?.Name;
+                    h.EvenByte1 == desiredFirstByte && h.EvenByte2 == desiredSecondByte)?.Name;
 
             if (hero != null)
                 return hero;

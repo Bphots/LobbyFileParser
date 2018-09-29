@@ -58,6 +58,7 @@ namespace LobbyFileParserTest
             "Malfurion",
             "Malthael",
             "Medivh",
+            "Mephisto",
             "Muradin",
             "Murky",
             "Nazeebo",
