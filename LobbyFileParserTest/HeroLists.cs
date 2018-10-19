@@ -56,6 +56,7 @@ namespace LobbyFileParserTest
             "Lunara",
             "Maiev",
             "Malfurion",
+			"Mal'Ganis",
             "Malthael",
             "Medivh",
             "Mephisto",
