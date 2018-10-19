@@ -61,17 +61,17 @@ namespace LobbyFileParser
                 m_heroElements.Add(heroElement);
 
                 evenByte2++;
-                if (evenByte2 > 0x03)
+                if (evenByte2 > 0xFF)
                 {
                     evenByte2 = 0;
                     evenByte1 += 1;
                 }
 
                 oddByte2++;
-                if (oddByte2 > 0x3F)
+                if (oddByte2 > 0x0F)
                 {
                     oddByte2 = 0;
-                    oddByte1 += 8;
+                    oddByte1 += 2;
                 }
             }
         }

@@ -25,23 +25,21 @@ namespace LobbyFileParser
             var offset = m_lobbyBytes.Find(new byte[] {0x73, 0x32, 0x6D, 0x76, 0, 0}) - 0x32B;
             
             var oddOffsetStart = offset;
-            selectedHeroes.Add(ParseOddHeroSelection(oddOffsetStart));
-            var evenOffset = oddOffsetStart + 2;
-            for (; evenOffset <= oddOffsetStart + 12; evenOffset += 3)
+            var oddOffset = oddOffsetStart;
+            for (; oddOffset <= oddOffsetStart + 12; oddOffset += 3)
             {
-                selectedHeroes.Add(ParseEvenHeroSelection(evenOffset));
-                var oddOffset = evenOffset + 1;
                 selectedHeroes.Add(ParseOddHeroSelection(oddOffset));
+                var evenOffset = oddOffset + 1;
+                selectedHeroes.Add(ParseEvenHeroSelection(evenOffset));
             }
-
-            selectedHeroes.Add(ParseEvenHeroSelection(evenOffset));
+            
 
             return selectedHeroes;
         }
 
         private string ParseOddHeroSelection(int oddOffset)
         {
-            var desiredFirstByte = (m_lobbyBytes[oddOffset] / 8) * 8;
+            var desiredFirstByte = m_lobbyBytes[oddOffset];
             var desiredSecondByte = m_lobbyBytes[oddOffset + 1];
             var hero = m_heroes.FirstOrDefault(
                     h => h.OddByte1 == desiredFirstByte
@@ -59,8 +57,8 @@ namespace LobbyFileParser
 
         private string ParseEvenHeroSelection(int evenOffset)
         {
-            var desiredFirstByte = m_lobbyBytes[evenOffset];
-            var desiredSecondByte = m_lobbyBytes[evenOffset + 1] % 8;
+            var desiredFirstByte = m_lobbyBytes[evenOffset] / 16;
+            var desiredSecondByte = m_lobbyBytes[evenOffset + 1];
             var hero =
                 m_heroes.FirstOrDefault(
                 h =>
