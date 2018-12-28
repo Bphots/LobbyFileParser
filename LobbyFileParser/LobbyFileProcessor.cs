@@ -16,28 +16,40 @@ namespace LobbyFileParser
             InitializeMapAttributes(maps);
         }
 
-        public Game ParseLobbyInfo()
+        public Region GetRegion()
         {
-            var game = new TagAndRegionParser(m_lobbyBytes).Parse();
-            var heroes = new SelectedHeroParser(m_lobbyBytes, m_heroes).ParseHeroesInfo();
+            m_game = new TagAndRegionParser(m_lobbyBytes).Parse();
+            return m_game.Region;
+        }
+
+        public List<LobbyParameter> LookForMatches(List<string> expectedHeroes, int startingOffset)
+        {
+            return new SelectedHeroParser(m_lobbyBytes, m_heroes).LookForMatches(expectedHeroes, startingOffset);
+        }
+
+        public Game ParseLobbyInfo(LobbyParameter lobbyParameter)
+        {
+            if (m_game == null)
+                m_game = new TagAndRegionParser(m_lobbyBytes).Parse();
+            var heroes = new SelectedHeroParser(m_lobbyBytes, m_heroes).ParseHeroesInfo(lobbyParameter);
             var map = new MapParser(m_lobbyBytes, m_maps).Parse();
 
-            if (game.Players.Count == 5 && heroes.GetRange(0, 5).All(h => h == SelectedHeroParser.Random))
+            if (m_game.Players.Count == 5 && heroes.GetRange(0, 5).All(h => h == SelectedHeroParser.Random))
             {
                 heroes.RemoveRange(0, 5);
             }
 
-            for (var i = 0; i < game.Players.Count; i++)
+            for (var i = 0; i < m_game.Players.Count; i++)
             {
                 if (!heroes.Contains(SelectedHeroParser.Fail))
-                    game.Players[i].SelectedHero = heroes[i];
+                    m_game.Players[i].SelectedHero = heroes[i];
                 else
-                    game.Players[i].SelectedHero = SelectedHeroParser.Fail;
+                    m_game.Players[i].SelectedHero = SelectedHeroParser.Fail;
             }
 
-            game.Map = map;
+            m_game.Map = map;
 
-            return game;
+            return m_game;
         }
 
 
@@ -50,5 +62,6 @@ namespace LobbyFileParser
         private List<string> m_heroes;
 
         private readonly byte[] m_lobbyBytes;
+        private Game m_game;
     }
 }
