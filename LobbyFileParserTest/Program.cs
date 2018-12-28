@@ -10,10 +10,62 @@ namespace LobbyFileParserTest
 {
     class Program
     {
+        private static List<LobbyParameter> LookForMatch(LobbyFileProcessor lobbyFileProcessor)
+        {
+            //var expectedHeroes = new List<string>()
+            //    {
+            //        @"Maiev",
+            //        @"Abathur",
+            //        @"Alarak",
+            //        @"Alexstrasza",
+            //        @"Ana",
+            //        @"Auriel",
+            //        @"Blaze",
+            //        @"Cassia",
+            //        @"Yrel",
+            //        @"Diablo"
+            //    };
+            var expectedHeroes = new List<string>()
+                {
+                    @"Zeratul",
+                    @"Zul'jin",
+                    @"Nazeebo",
+                    @"Valeera",
+                     @"Muradin",
+                     @"Orphea",
+                     @"Tyrande",
+                     @"Valla",
+                     @"Tyrael",
+                     @"Tracer"
+                };
+
+            return lobbyFileProcessor.LookForMatches(expectedHeroes, 0x39A);
+        }
+
         static void Main(string[] args)
         {
-            var lobbyProcesser = new LobbyFileProcessor(args[0], HeroLists.Heroes, MapLists.Maps);
-            var game           = lobbyProcesser.ParseLobbyInfo();
+            var lobbyProcessor = new LobbyFileProcessor(args[0], HeroLists.Heroes, MapLists.Maps);
+            var results = LookForMatch(lobbyProcessor);
+
+            var lobbyParameter = new LobbyParameter()
+                {
+                    OddByte1 = 0,
+                    OddByte2 = 2,
+                    EvenByte1 = 0,
+                    EvenByte2 = 2,
+                    OddNotation = 4,
+                    EvenNotation = 64,
+                    OddIncrement = 1,
+                    EvenIncrement = 8,
+                    OffSet = 0x39A,
+                    RandomOddByte1 = 0,
+                    RandomOddByte2 = 1,
+                    RandomEvenByte1 = 0,
+                    RandomEvenByte2 = 1,
+                    StartWithOdd = true
+                };
+
+            var game           = lobbyProcessor.ParseLobbyInfo(lobbyParameter);
 
             /*
             Console.WriteLine("Game.Region = {0}", game.Region);

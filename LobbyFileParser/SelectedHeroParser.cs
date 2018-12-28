@@ -9,8 +9,8 @@ namespace LobbyFileParser
         public const string Random = "Random";
         public const string Fail = "Fail";
 
-        private static readonly byte[] RandomOddBytes = { 0x00, 0x00 };
-        private static readonly byte[] RandomEvenBytes = { 0x00, 0x00 };
+        private readonly byte[] m_randomOddBytes = { 0x00, 0x00 };
+        private readonly byte[] m_randomEvenBytes = { 0x00, 0x00 };
 
         private readonly List<HeroElement> m_heroElements = new List<HeroElement>();
         private readonly byte[] m_lobbyBytes;
@@ -22,57 +22,102 @@ namespace LobbyFileParser
             m_heroes = heroes;
         }
 
-        public List<string> ParseHeroesInfo()
+        public List<string> ParseHeroesInfo(LobbyParameter lobbyParameter)
         {
             var selectedHeroes = new List<string>();
-            var offset = m_lobbyBytes.Find(new byte[] { 0x73, 0x32, 0x6D, 0x76, 0, 0 }) - 0x39B;
+            var offset = m_lobbyBytes.Find(new byte[] { 0x73, 0x32, 0x6D, 0x76, 0, 0 }) - lobbyParameter.OffSet;
 
-            InitializeHeroes(0, 2, 1, 0, 32, 2, 4, 1);
-            SevenPairsAttempt(offset, selectedHeroes, 4);
+            InitializeHeroes(lobbyParameter.OddByte1, lobbyParameter.OddByte2, lobbyParameter.EvenByte1, lobbyParameter.EvenByte2, lobbyParameter.OddNotation, lobbyParameter.EvenNotation, lobbyParameter.OddIncrement, lobbyParameter.EvenIncrement);
+            m_randomOddBytes[0] = lobbyParameter.RandomOddByte1;
+            m_randomOddBytes[1] = lobbyParameter.RandomOddByte2;
+            m_randomEvenBytes[0] = lobbyParameter.RandomEvenByte1;
+            m_randomEvenBytes[1] = lobbyParameter.RandomEvenByte2;
 
-            // LookForMatches(offset, selectedHeroes);
+            if (lobbyParameter.StartWithOdd)
+                FivePairsAttempt(offset, selectedHeroes, lobbyParameter.EvenIncrement);
+            else
+                SevenPairsAttempt(offset, selectedHeroes, lobbyParameter.OddIncrement);
 
             return selectedHeroes;
         }
 
-        private void LookForMatches(int offset, List<string> selectedHeroes)
+        public List<LobbyParameter> LookForMatches(List<string> expectedHeroes, int startingOffset)
         {
-            bool successful = false;
+            var selectedHeroes = new List<string>();
+            var offset = m_lobbyBytes.Find(new byte[] { 0x73, 0x32, 0x6D, 0x76, 0, 0 }) - startingOffset;
+            var successfulLobbyParameters = new List<LobbyParameter>();
 
             var possibleByteStarts = new[] { new byte[] { 0, 2, 0, 2 }, new byte[] { 2, 0, 0, 2 }, new byte[] { 0, 2, 1, 0 }, new byte[] { 2, 0, 2, 0 } };
             // 9 * 9 * 9 * 9 * 4 / 2
-            for (byte oddNotation = 1; oddNotation > 0 && !successful; oddNotation *= 2)
+            for (byte oddNotation = 1; oddNotation > 0; oddNotation *= 2)
             {
-                for (byte oddIncrement = 1; oddIncrement > 0 && !successful; oddIncrement *= 2)
+                for (byte oddIncrement = 1; oddIncrement > 0; oddIncrement *= 2)
                 {
-                    for (byte evenNotation = 1; evenNotation > 0 && !successful; evenNotation *= 2)
+                    for (byte evenNotation = 1; evenNotation > 0; evenNotation *= 2)
                     {
-                        for (byte evenIncrement = 1; evenIncrement > 0 && !successful; evenIncrement *= 2)
+                        for (byte evenIncrement = 1; evenIncrement > 0; evenIncrement *= 2)
                         {
                             if (evenIncrement < oddNotation && oddIncrement < evenNotation)
                                 continue;
 
+                            
                             foreach (var possibleByteStart in possibleByteStarts)
                             {
                                 InitializeHeroes(
                                     possibleByteStart[0], possibleByteStart[1], possibleByteStart[2], possibleByteStart[3], oddNotation, evenNotation, oddIncrement, evenIncrement);
 
+                                selectedHeroes.Clear();
                                 if (evenIncrement > oddNotation && FivePairsAttempt(offset, selectedHeroes, evenIncrement))
                                 {
-                                    successful = true;
-                                    break;
+                                    if (expectedHeroes.All(h => selectedHeroes.Contains(h)))
+                                    {
+                                        var lobbyParameter = new LobbyParameter()
+                                            {
+                                                OddByte1 = possibleByteStart[0],
+                                                OddByte2 = possibleByteStart[1],
+                                                EvenByte1 = possibleByteStart[2],
+                                                EvenByte2 = possibleByteStart[3],
+                                                OddNotation = oddNotation,
+                                                EvenNotation = evenNotation,
+                                                OddIncrement = oddIncrement,
+                                                EvenIncrement = evenIncrement,
+                                                OffSet = startingOffset,
+                                                StartWithOdd = true
+                                            };
+
+                                        successfulLobbyParameters.Add(lobbyParameter);
+                                    }
                                 }
 
+                                selectedHeroes.Clear();
                                 if (oddIncrement > evenNotation && SevenPairsAttempt(offset, selectedHeroes, oddIncrement))
                                 {
-                                    successful = true;
-                                    break;
+                                    if (expectedHeroes.All(h => selectedHeroes.Contains(h)))
+                                    {
+                                        var lobbyParameter = new LobbyParameter()
+                                            {
+                                                OddByte1 = possibleByteStart[0],
+                                                OddByte2 = possibleByteStart[1],
+                                                EvenByte1 = possibleByteStart[2],
+                                                EvenByte2 = possibleByteStart[3],
+                                                OddNotation = oddNotation,
+                                                EvenNotation = evenNotation,
+                                                OddIncrement = oddIncrement,
+                                                EvenIncrement = evenIncrement,
+                                                OffSet = startingOffset,
+                                                StartWithOdd = false
+                                        };
+
+                                        successfulLobbyParameters.Add(lobbyParameter);
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
+
+            return successfulLobbyParameters;
         }
 
         private static bool IsSuccessful(IList<string> selectedHeroes)
@@ -157,8 +202,11 @@ namespace LobbyFileParser
             if (hero != null)
                 return hero;
 
-            if (RandomOddBytes[0] == desiredFirstByte
-                && RandomOddBytes[1] == desiredSecondByte)
+            if (m_randomOddBytes[0] == desiredFirstByte
+                && m_randomOddBytes[1] == desiredSecondByte)
+                return Random;
+
+            if (desiredFirstByte == 0x00 && desiredSecondByte == 0x00)
                 return Random;
 
             return Fail;
@@ -176,8 +224,11 @@ namespace LobbyFileParser
             if (hero != null)
                 return hero;
 
-            if (desiredFirstByte == RandomEvenBytes[0] && desiredSecondByte == RandomEvenBytes[1])
+            if (desiredFirstByte == m_randomEvenBytes[0] && desiredSecondByte == m_randomEvenBytes[1])
                 return Random;
+
+            if (desiredFirstByte == 0x00 && desiredSecondByte == 0x00)
+                return Random; 
 
             return Fail;
         }
@@ -193,8 +244,11 @@ namespace LobbyFileParser
             if (hero != null)
                 return hero;
 
-            if (RandomOddBytes[0] == desiredFirstByte 
-                && RandomOddBytes[1] == desiredSecondByte)
+            if (m_randomOddBytes[0] == desiredFirstByte 
+                && m_randomOddBytes[1] == desiredSecondByte)
+                return Random;
+
+            if (desiredFirstByte == 0x00 && desiredSecondByte == 0x00)
                 return Random;
 
             return Fail;
@@ -212,7 +266,10 @@ namespace LobbyFileParser
             if (hero != null)
                 return hero;
 
-            if (desiredFirstByte == RandomEvenBytes[0] && desiredSecondByte == RandomEvenBytes[1])
+            if (desiredFirstByte == m_randomEvenBytes[0] && desiredSecondByte == m_randomEvenBytes[1])
+                return Random;
+
+            if (desiredFirstByte == 0x00 && desiredSecondByte == 0x00)
                 return Random;
 
             return Fail;
