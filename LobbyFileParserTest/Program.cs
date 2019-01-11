@@ -39,12 +39,12 @@ namespace LobbyFileParserTest
                      @"Tracer"
                 };
 
-            return lobbyFileProcessor.LookForMatches(expectedHeroes, 0x39A);
+            return lobbyFileProcessor.LookForMatches(expectedHeroes, 0x39A, HeroLists.Heroes);
         }
 
         static void Main(string[] args)
         {
-            var lobbyProcessor = new LobbyFileProcessor(args[0], HeroLists.Heroes, MapLists.Maps);
+            var lobbyProcessor = new LobbyFileProcessor(args[0]);
             var results = LookForMatch(lobbyProcessor);
 
             var lobbyParameter = new LobbyParameter()
@@ -65,7 +65,7 @@ namespace LobbyFileParserTest
                     StartWithOdd = true
                 };
 
-            var game           = lobbyProcessor.ParseLobbyInfo(lobbyParameter);
+            var game           = lobbyProcessor.ParseLobbyInfo(lobbyParameter, HeroLists.Heroes, MapLists.Maps);
 
             /*
             Console.WriteLine("Game.Region = {0}", game.Region);

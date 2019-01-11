@@ -7,13 +7,11 @@ namespace LobbyFileParser
 {
     public class LobbyFileProcessor
     {
-        public LobbyFileProcessor(string lobbyFile, List<string> heroes, List<string> maps)
+        public LobbyFileProcessor(string lobbyFile)
         {
             var tempPath = Path.GetTempFileName();
             File.Copy(lobbyFile, tempPath, true);
             m_lobbyBytes = File.ReadAllBytes(tempPath);
-            m_heroes = heroes;
-            InitializeMapAttributes(maps);
         }
 
         public Region GetRegion()
@@ -22,16 +20,18 @@ namespace LobbyFileParser
             return m_game.Region;
         }
 
-        public List<LobbyParameter> LookForMatches(List<string> expectedHeroes, int startingOffset)
+        public List<LobbyParameter> LookForMatches(List<string> expectedHeroes, int startingOffset, List<string> heroeNames)
         {
-            return new SelectedHeroParser(m_lobbyBytes, m_heroes).LookForMatches(expectedHeroes, startingOffset);
+            return new SelectedHeroParser(m_lobbyBytes, heroeNames).LookForMatches(expectedHeroes, startingOffset);
         }
 
-        public Game ParseLobbyInfo(LobbyParameter lobbyParameter)
+        public Game ParseLobbyInfo(LobbyParameter lobbyParameter, List<string> heroeNames, List<string> maps)
         {
+            InitializeMapAttributes(maps);
+
             if (m_game == null)
                 m_game = new TagAndRegionParser(m_lobbyBytes).Parse();
-            var heroes = new SelectedHeroParser(m_lobbyBytes, m_heroes).ParseHeroesInfo(lobbyParameter);
+            var heroes = new SelectedHeroParser(m_lobbyBytes, heroeNames).ParseHeroesInfo(lobbyParameter);
             var map = new MapParser(m_lobbyBytes, m_maps).Parse();
 
             if (m_game.Players.Count == 5 && heroes.GetRange(0, 5).All(h => h == SelectedHeroParser.Random))
@@ -59,7 +59,6 @@ namespace LobbyFileParser
         }
 
         private List<string> m_maps;
-        private List<string> m_heroes;
 
         private readonly byte[] m_lobbyBytes;
         private Game m_game;
